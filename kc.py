@@ -376,7 +376,7 @@ elif menu == "About Me":
         -  Create and manage projects
         -  Edit project details easily
         -  Secure your projects with password protection
-        -  Smart save feature (no duplicate saves)
+        -  Smart save feature 
         -  Delete projects when needed
         
         ---
