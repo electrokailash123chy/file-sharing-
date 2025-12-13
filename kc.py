@@ -7,7 +7,7 @@ import hashlib
 # Configuration
 PROJECTS_FILE = "projects_data.json"
 ATTACHMENTS_FOLDER = "project_attachments"
-PASSWORD_HASH = hashlib.sha256("admin123".encode()).hexdigest()  # Default password: admin123
+PASSWORD_HASH = hashlib.sha256("adminadmin".encode()).hexdigest()  # Default password: admin123
 PROFILE_IMAGE = "profile.jpeg"  # Place your profile image in the same folder
 
 # Create attachments folder if it doesn't exist
