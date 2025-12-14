@@ -19,7 +19,7 @@ st.write(df.head())
 st.write(df.tail())
 st.write("Rows & Columns:", df.shape)
 st.write("Columns:", df.columns)
-st.text(df.info())
+
 
 
 
