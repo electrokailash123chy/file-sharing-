@@ -1,89 +1,779 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>ESP32 LED Control</title>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Home Control</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 2.5em;
+            margin-bottom: 40px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .add-device-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border: 3px dashed #ccc;
+        }
+
+        .add-device-card h2 {
+            color: #4a5568;
+            margin-bottom: 25px;
+            font-size: 1.5em;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        input[type="number"],
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="number"]:focus,
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .add-btn {
+            width: 100%;
+            padding: 15px;
+            background: #48bb78;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .add-btn:hover {
+            background: #38a169;
+        }
+
+        .devices-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .device-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s;
+        }
+
+        .device-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .device-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .device-name {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #2d3748;
+        }
+
+        .delete-btn {
+            background: #fc8181;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .delete-btn:hover {
+            background: #f56565;
+        }
+
+        .device-info {
+            color: #718096;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .timer-section {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .timer-section h4 {
+            color: #4a5568;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .timer-controls {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .timer-controls input {
+            width: 60px;
+            padding: 6px;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .timer-controls select {
+            padding: 6px;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            font-size: 14px;
+            flex: 1;
+        }
+
+        .timer-btn {
+            padding: 8px 15px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background 0.3s;
+        }
+
+        .timer-btn:hover {
+            background: #5568d3;
+        }
+
+        .cancel-timer-btn {
+            background: #fc8181;
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .cancel-timer-btn:hover {
+            background: #f56565;
+        }
+
+        .timer-display {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        .timer-action-select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .toggle-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-text {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .status-text.on {
+            color: #48bb78;
+        }
+
+        .status-text.off {
+            color: #cbd5e0;
+        }
+
+        /* Toggle Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #48bb78;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .empty-state {
+            background: white;
+            border-radius: 15px;
+            padding: 60px;
+            text-align: center;
+            color: #a0aec0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .empty-state p {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .login-card {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            max-width: 400px;
+            margin: 100px auto;
+        }
+
+        .login-card h2 {
+            color: #4a5568;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 1.8em;
+        }
+
+        .logout-btn {
+            background: #fc8181;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            float: right;
+            margin-bottom: 20px;
+        }
+
+        .logout-btn:hover {
+            background: #f56565;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .error-msg {
+            color: #f56565;
+            text-align: center;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 </head>
 <body>
-  <h2>ESP32 LED Control</h2>
+    <!-- Login Section -->
+    <div id="loginSection" class="container">
+        <div class="login-card">
+            <h2>🔐 Login</h2>
+            <div class="input-group">
+                <input type="email" id="loginEmail" placeholder="Email">
+            </div>
+            <div class="input-group">
+                <input type="password" id="loginPassword" placeholder="Password">
+            </div>
+            <button class="add-btn" onclick="login()">Login</button>
+            <p id="errorMsg" class="error-msg"></p>
+        </div>
+    </div>
 
-  <!-- Single container for login or LED control -->
-  <div id="container">
-    <input type="email" id="email" placeholder="Email"><br><br>
-    <input type="password" id="password" placeholder="Password"><br><br>
-    <button onclick="login()">Login / Sign Up</button>
-    <p id="message"></p>
-  </div>
+    <!-- Dashboard Section -->
+    <div id="dashboardSection" class="container hidden">
+        <button class="logout-btn" onclick="logout()">Logout</button>
+        <h1>🏠 Smart Home Control</h1>
+        
+        <div class="content">
+            <!-- Add Device Card -->
+            <div class="add-device-card">
+                <h2>Add Device</h2>
+                <div class="input-group">
+                    <input type="number" id="pinInput" placeholder="GPIO Pin (e.g. 2)" min="0" max="39">
+                </div>
+                <div class="input-group">
+                    <input type="text" id="nameInput" placeholder="Name (e.g. Fan)">
+                </div>
+                <button class="add-btn" onclick="addDevice()">Add</button>
+            </div>
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyAFTxTvVYH6IsVBLZtrr84qvkc0JsARTTQ",
-      authDomain: "esp32-led-ed9ea.firebaseapp.com",
-      databaseURL: "https://esp32-led-ed9ea-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "esp32-led-ed9ea",
-    };
+            <!-- Devices List -->
+            <div id="devicesContainer" class="devices-grid">
+                <div class="empty-state">
+                    <p>📱 No devices added yet</p>
+                    <small>Add your first device to get started</small>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.database();
-    const ledRef = db.ref('pin4');
-
-    const container = document.getElementById('container');
-    const message = document.getElementById('message');
-
-    function login() {
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-
-      if (!email || !password) {
-        message.innerText = "Enter valid email and password";
-        return;
-      }
-
-      auth.signInWithEmailAndPassword(email, password)
-        .then(() => showLED())
-        .catch(() => {
-          auth.createUserWithEmailAndPassword(email, password)
-            .then(() => showLED())
-            .catch(() => {
-              message.innerText = "Enter valid email id";
-            });
+    <script>
+        // Firebase Configuration
+        firebase.initializeApp({
+            apiKey: "AIzaSyAFTxTvVYH6IsVBLZtrr84qvkc0JsARTTQ",
+            authDomain: "esp32-led-ed9ea.firebaseapp.com",
+            projectId: "esp32-led-ed9ea"
         });
-    }
+        const auth = firebase.auth();
+        const FIREBASE_URL = "https://esp32-led-ed9ea-default-rtdb.asia-southeast1.firebasedatabase.app";
+        
+        // Timer tracking
+        const deviceTimers = {};
+        
+        // Check authentication state on page load
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('dashboardSection').classList.remove('hidden');
+                loadDevices();
+            } else {
+                document.getElementById('loginSection').classList.remove('hidden');
+                document.getElementById('dashboardSection').classList.add('hidden');
+            }
+        });
 
-    function showLED() {
-      container.innerHTML = `
-        <button onclick="toggleLED()">Toggle LED</button>
-        <p>Status: <span id="status">OFF</span></p>
-        <button onclick="logout()">Logout</button>
-      `;
-      listenLED();
-    }
+        // Login function
+        function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const errorMsg = document.getElementById('errorMsg');
 
-    function logout() {
-      auth.signOut();
-      location.reload(); // reload page to show login inputs again
-    }
+            if (!email || !password) {
+                errorMsg.textContent = 'Please enter email and password';
+                return;
+            }
 
-    function toggleLED() {
-      ledRef.get().then(snapshot => {
-        const value = snapshot.val();
-        ledRef.set(value === 1 ? 0 : 1);
-      });
-    }
+            auth.signInWithEmailAndPassword(email, password)
+                .then(() => {
+                    errorMsg.textContent = '';
+                })
+                .catch(err => {
+                    errorMsg.textContent = err.message;
+                });
+        }
 
-    function listenLED() {
-      ledRef.on('value', snapshot => {
-        const value = snapshot.val();
-        document.getElementById('status').innerText = value === 1 ? "ON" : "OFF";
-      });
-    }
+        // Logout function
+        function logout() {
+            auth.signOut();
+        }
 
-    auth.onAuthStateChanged(user => {
-      if (user) showLED();
-    });
-  </script>
+        // Get auth token
+        async function getAuthToken() {
+            const user = auth.currentUser;
+            if (!user) return null;
+            return await user.getIdToken();
+        }
+
+        // Add new device
+        async function addDevice() {
+            const pin = document.getElementById('pinInput').value;
+            const name = document.getElementById('nameInput').value;
+
+            if (!pin || !name) {
+                alert('Please enter both GPIO pin and device name');
+                return;
+            }
+
+            try {
+                const token = await getAuthToken();
+                const response = await fetch(`${FIREBASE_URL}/pins/${pin}.json?auth=${token}`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        status: 0,
+                        name: name
+                    })
+                });
+
+                if (response.ok) {
+                    document.getElementById('pinInput').value = '';
+                    document.getElementById('nameInput').value = '';
+                    loadDevices();
+                }
+            } catch (error) {
+                console.error('Error adding device:', error);
+                alert('Failed to add device');
+            }
+        }
+
+        // Load all devices from Firebase
+        async function loadDevices() {
+            if (!auth.currentUser) return;
+
+            try {
+                const token = await getAuthToken();
+                const response = await fetch(`${FIREBASE_URL}/pins.json?auth=${token}`);
+                const data = await response.json();
+
+                const container = document.getElementById('devicesContainer');
+                
+                if (!data || Object.keys(data).length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <p>📱 No devices added yet</p>
+                            <small>Add your first device to get started</small>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Get existing device pins
+                const existingCards = container.querySelectorAll('.device-card');
+                const existingPins = new Set();
+                existingCards.forEach(card => {
+                    const pinMatch = card.innerHTML.match(/GPIO Pin: (\d+)/);
+                    if (pinMatch) existingPins.add(pinMatch[1]);
+                });
+
+                // Update existing cards or create new ones
+                for (const [pin, device] of Object.entries(data)) {
+                    if (existingPins.has(pin)) {
+                        // Update existing card
+                        updateDeviceCard(pin, device);
+                    } else {
+                        // Create new card
+                        const card = createDeviceCard(pin, device);
+                        container.appendChild(card);
+                    }
+                    existingPins.delete(pin);
+                }
+
+                // Remove cards for deleted devices
+                existingPins.forEach(pin => {
+                    const cards = container.querySelectorAll('.device-card');
+                    cards.forEach(card => {
+                        if (card.innerHTML.includes(`GPIO Pin: ${pin}`)) {
+                            cancelTimer(parseInt(pin));
+                            card.remove();
+                        }
+                    });
+                });
+            } catch (error) {
+                console.error('Error loading devices:', error);
+            }
+        }
+
+        // Update existing device card (only status)
+        function updateDeviceCard(pin, device) {
+            const isOn = device.status === 1;
+            const statusElement = document.getElementById(`status-${pin}`);
+            const checkbox = document.querySelector(`#status-${pin}`).parentElement.nextElementSibling.querySelector('input[type="checkbox"]');
+            
+            if (statusElement) {
+                statusElement.textContent = isOn ? 'ON' : 'OFF';
+                statusElement.className = `status-text ${isOn ? 'on' : 'off'}`;
+            }
+            
+            if (checkbox) {
+                checkbox.checked = isOn;
+            }
+        }
+
+        // Create device card element
+        function createDeviceCard(pin, device) {
+            const card = document.createElement('div');
+            card.className = 'device-card';
+            card.setAttribute('data-pin', pin);
+            
+            const isOn = device.status === 1;
+            const hasTimer = deviceTimers[pin] !== undefined;
+            
+            card.innerHTML = `
+                <div class="device-header">
+                    <div class="device-name">${device.name}</div>
+                    <button class="delete-btn" onclick="deleteDevice(${pin})">Delete</button>
+                </div>
+                <div class="device-info">GPIO Pin: ${pin}</div>
+                <div class="toggle-container">
+                    <span class="status-text ${isOn ? 'on' : 'off'}" id="status-${pin}">
+                        ${isOn ? 'ON' : 'OFF'}
+                    </span>
+                    <label class="switch">
+                        <input type="checkbox" ${isOn ? 'checked' : ''} 
+                               onchange="toggleDevice(${pin}, this.checked)">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                
+                <!-- Timer Section -->
+                <div class="timer-section">
+                    <h4>⏱️ Timer</h4>
+                    <select class="timer-action-select" id="timer-action-${pin}">
+                        <option value="toggle">Toggle (ON↔OFF)</option>
+                        <option value="on">Turn ON</option>
+                        <option value="off">Turn OFF</option>
+                    </select>
+                    <div class="timer-controls">
+                        <input type="number" id="timer-value-${pin}" placeholder="#" min="1" value="5">
+                        <select id="timer-unit-${pin}">
+                            <option value="seconds">Seconds</option>
+                            <option value="minutes" selected>Minutes</option>
+                            <option value="hours">Hours</option>
+                        </select>
+                        <button class="timer-btn" onclick="setTimer(${pin})">Set</button>
+                    </div>
+                    <div id="timer-display-${pin}" class="timer-display" style="display:none;"></div>
+                </div>
+            `;
+            
+            return card;
+        }
+
+        // Toggle device status
+        async function toggleDevice(pin, isOn) {
+            const status = isOn ? 1 : 0;
+            
+            try {
+                const token = await getAuthToken();
+                await fetch(`${FIREBASE_URL}/pins/${pin}/status.json?auth=${token}`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(status)
+                });
+
+                const statusText = document.getElementById(`status-${pin}`);
+                statusText.textContent = isOn ? 'ON' : 'OFF';
+                statusText.className = `status-text ${isOn ? 'on' : 'off'}`;
+            } catch (error) {
+                console.error('Error toggling device:', error);
+                alert('Failed to toggle device');
+            }
+        }
+
+        // Delete device
+        async function deleteDevice(pin) {
+            if (!confirm('Are you sure you want to delete this device?')) {
+                return;
+            }
+
+            try {
+                const token = await getAuthToken();
+                await fetch(`${FIREBASE_URL}/pins/${pin}.json?auth=${token}`, {
+                    method: 'DELETE'
+                });
+
+                loadDevices();
+            } catch (error) {
+                console.error('Error deleting device:', error);
+                alert('Failed to delete device');
+            }
+        }
+
+        // Set Timer
+        function setTimer(pin) {
+            const value = parseInt(document.getElementById(`timer-value-${pin}`).value);
+            const unit = document.getElementById(`timer-unit-${pin}`).value;
+            const action = document.getElementById(`timer-action-${pin}`).value;
+
+            if (!value || value <= 0) {
+                alert('Please enter a valid time');
+                return;
+            }
+
+            // Convert to milliseconds
+            let ms = value * 1000; // seconds
+            if (unit === 'minutes') ms = value * 60 * 1000;
+            if (unit === 'hours') ms = value * 60 * 60 * 1000;
+
+            // Clear existing timer if any
+            if (deviceTimers[pin]) {
+                clearInterval(deviceTimers[pin].interval);
+            }
+
+            const endTime = Date.now() + ms;
+            
+            // Store timer info
+            deviceTimers[pin] = {
+                endTime: endTime,
+                action: action,
+                interval: null
+            };
+
+            // Update display immediately
+            updateTimerDisplay(pin);
+
+            // Start countdown
+            deviceTimers[pin].interval = setInterval(() => {
+                const remaining = deviceTimers[pin].endTime - Date.now();
+                
+                if (remaining <= 0) {
+                    // Timer expired - execute action
+                    clearInterval(deviceTimers[pin].interval);
+                    executeTimerAction(pin, deviceTimers[pin].action);
+                    delete deviceTimers[pin];
+                    document.getElementById(`timer-display-${pin}`).style.display = 'none';
+                } else {
+                    updateTimerDisplay(pin);
+                }
+            }, 1000);
+        }
+
+        // Update timer display
+        function updateTimerDisplay(pin) {
+            const display = document.getElementById(`timer-display-${pin}`);
+            if (!deviceTimers[pin]) {
+                display.style.display = 'none';
+                return;
+            }
+
+            const remaining = deviceTimers[pin].endTime - Date.now();
+            const action = deviceTimers[pin].action;
+            
+            const hours = Math.floor(remaining / (1000 * 60 * 60));
+            const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+
+            let timeStr = '';
+            if (hours > 0) timeStr += `${hours}h `;
+            if (minutes > 0) timeStr += `${minutes}m `;
+            timeStr += `${seconds}s`;
+
+            const actionText = action === 'toggle' ? 'Toggle' : action === 'on' ? 'Turn ON' : 'Turn OFF';
+            
+            display.innerHTML = `
+                ${actionText} in: ${timeStr}
+                <button class="timer-btn cancel-timer-btn" onclick="cancelTimer(${pin})">Cancel</button>
+            `;
+            display.style.display = 'block';
+        }
+
+        // Cancel timer
+        function cancelTimer(pin) {
+            if (deviceTimers[pin]) {
+                clearInterval(deviceTimers[pin].interval);
+                delete deviceTimers[pin];
+                document.getElementById(`timer-display-${pin}`).style.display = 'none';
+            }
+        }
+
+        // Execute timer action
+        async function executeTimerAction(pin, action) {
+            const statusElement = document.getElementById(`status-${pin}`);
+            const currentStatus = statusElement.textContent === 'ON' ? 1 : 0;
+            
+            let newStatus;
+            if (action === 'toggle') {
+                newStatus = currentStatus === 1 ? 0 : 1;
+            } else if (action === 'on') {
+                newStatus = 1;
+            } else {
+                newStatus = 0;
+            }
+
+            // Toggle the device
+            try {
+                const token = await getAuthToken();
+                await fetch(`${FIREBASE_URL}/pins/${pin}/status.json?auth=${token}`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(newStatus)
+                });
+
+                // Reload devices to update UI
+                loadDevices();
+                
+                // Show notification
+                alert(`Device on GPIO ${pin} timer executed: ${action === 'toggle' ? 'Toggled' : action === 'on' ? 'Turned ON' : 'Turned OFF'}`);
+            } catch (error) {
+                console.error('Error executing timer action:', error);
+            }
+        }
+
+        // Auto-refresh every 2 seconds to sync with ESP32 changes
+        setInterval(() => {
+            if (auth.currentUser) loadDevices();
+        }, 2000);
+    </script>
 </body>
 </html>
