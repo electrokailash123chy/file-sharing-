@@ -1,367 +1,41 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kailash chaudhary (Tikapur)| Electronics & IoT Portfolio</title>
-
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-    <style>
-        :root {
-            --primary: #0d6efd;
-            --dark: #1c1c1c;
-            --light: #f8f9fa;
-            --gray: #6c757d;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
-        }
-
-        body {
-            background: var(--light);
-            color: var(--dark);
-            line-height: 1.6;
-        }
-
-        /* ====== NAVBAR ====== */
-        header {
-            background: #ffffff;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-
-        nav {
-            max-width: 1200px;
-            margin: auto;
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        nav h1 {
-            font-size: 1.5rem;
-            color: var(--primary);
-        }
-
-        nav ul {
-            list-style: none;
-            display: flex;
-            gap: 1.5rem;
-        }
-
-        nav ul li a {
-            text-decoration: none;
-            color: var(--dark);
-            font-weight: 500;
-        }
-
-        nav ul li a:hover {
-            color: var(--primary);
-        }
-
-        /* ====== HERO ====== */
-        .hero {
-            background: linear-gradient(135deg, #0d6efd, #003c8f);
-            color: #ffffff;
-            padding: 5rem 2rem;
-        }
-
-        .hero-content {
-            max-width: 1200px;
-            margin: auto;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            align-items: center;
-            gap: 2rem;
-        }
-
-        .hero h2 {
-            font-size: 2.8rem;
-            margin-bottom: 1rem;
-        }
-
-        .hero p {
-            font-size: 1.1rem;
-            margin-bottom: 2rem;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 0.8rem 1.8rem;
-            background: #ffffff;
-            color: var(--primary);
-            text-decoration: none;
-            border-radius: 30px;
-            font-weight: 600;
-        }
-
-        .btn:hover {
-            background: #e2e6ea;
-        }
-
-        /* ====== SECTION ====== */
-        section {
-            padding: 4rem 2rem;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: auto;
-        }
-
-        .section-title {
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-
-        .section-title h2 {
-            font-size: 2.2rem;
-            color: var(--primary);
-        }
-
-        /* ====== ABOUT ====== */
-        .about p {
-            max-width: 900px;
-            margin: auto;
-            text-align: center;
-            font-size: 1.05rem;
-            color: var(--gray);
-        }
-
-        /* ====== SKILLS ====== */
-        .skills-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .skill-card {
-            background: #ffffff;
-            padding: 1.8rem;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-        }
-
-        .skill-card h3 {
-            margin-bottom: 0.8rem;
-            color: var(--primary);
-        }
-
-        /* ====== PROJECTS ====== */
-        .projects-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 2rem;
-        }
-
-        .project-card {
-            background: #ffffff;
-            padding: 2rem;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-        }
-
-        .project-card h3 {
-            margin-bottom: 0.8rem;
-            color: var(--primary);
-        }
-
-        .project-card p {
-            color: var(--gray);
-            font-size: 0.95rem;
-        }
-
-        /* ====== EDUCATION ====== */
-        .timeline {
-            max-width: 800px;
-            margin: auto;
-        }
-
-        .timeline-item {
-            background: #ffffff;
-            padding: 1.5rem;
-            border-left: 4px solid var(--primary);
-            margin-bottom: 1.5rem;
-            border-radius: 8px;
-        }
-
-        /* ====== FOOTER ====== */
-        footer {
-            background: #1c1c1c;
-            color: #ffffff;
-            text-align: center;
-            padding: 2rem 1rem;
-        }
-
-        footer p {
-            font-size: 0.9rem;
-            color: #cccccc;
-        }
-
-        /* ====== RESPONSIVE ====== */
-        @media(max-width: 900px) {
-            .hero-content {
-                grid-template-columns: 1fr;
-                text-align: center;
-            }
-        }
-    </style>
+  <title>ESP32 LED Control</title>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 </head>
 <body>
+  <h2>ESP32 LED Control (Pin 4)</h2>
+  <button onclick="toggleLED()">Toggle LED</button>
+  <p>Status: <span id="status">OFF</span></p>
 
-<!-- NAVBAR -->
-<header>
-    <nav>
-        <h1>Kailash</h1>
-        <ul>
-            <li><a href="#about">About</a></li>
-            <li><a href="#skills">Skills</a></li>
-            <li><a href="#projects">Projects</a></li>
-            <li><a href="#education">Education</a></li>
-            <li><a href="#contact">Contact</a></li>
-        </ul>
-    </nav>
-</header>
+  <script>
+    // Firebase config
+    const firebaseConfig = {
+     apiKey: "AIzaSyAFTxTvVYH6IsVBLZtrr84qvkc0JsARTTQ",
+    authDomain: "esp32-led-ed9ea.firebaseapp.com",
+    databaseURL: "https://esp32-led-ed9ea-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "esp32-led-ed9ea",
+    };
 
-<!-- HERO -->
-<section class="hero">
-    <div class="hero-content">
-        <div>
-            <h2>Electronics & IoT Engineer</h2>
-            <p>
-                Electronics and Communication Engineering student with strong interest in 
-                IoT systems, embedded programming, Arduino, ESP8266/ESP32, MicroPython, 
-                and real‑world electronic product development.
-            </p>
-            <a href="#projects" class="btn">View My Projects</a>
-        </div>
-    </div>
-</section>
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const ledRef = db.ref('pin4');
 
-<!-- ABOUT -->
-<section id="about" class="about">
-    <div class="container">
-        <div class="section-title">
-            <h2>About Me</h2>
-        </div>
-        <p>
-            I am a BE Electronics and Communication Engineering student from Khwopa Engineering College. 
-            I actively design and implement practical electronics and IoT projects using Arduino, 
-            NodeMCU (ESP8266), ESP32, sensors, RF modules, and cloud platforms. 
-            I also create educational electronics content and project demonstrations on YouTube.
-        </p>
-    </div>
-</section>
+    // Toggle LED
+    function toggleLED() {
+      ledRef.get().then(snapshot => {
+        const value = snapshot.val();
+        ledRef.set(value === 1 ? 0 : 1);
+      });
+    }
 
-<!-- SKILLS -->
-<section id="skills">
-    <div class="container">
-        <div class="section-title">
-            <h2>Technical Skills</h2>
-        </div>
-        <div class="skills-grid">
-            <div class="skill-card">
-                <h3>Embedded Systems</h3>
-                <p>Arduino UNO/Nano, ESP8266, ESP32, ATmega328, register‑level programming</p>
-            </div>
-            <div class="skill-card">
-                <h3>IoT & Networking</h3>
-                <p>LoRa, WiFi, Firebase, ThingSpeak, Blynk IoT, Cloud data logging</p>
-            </div>
-            <div class="skill-card">
-                <h3>Programming</h3>
-                <p>C,c++, Embedded C, Python, MicroPython, MATLAB</p>
-            </div>
-            <div class="skill-card">
-                <h3>Electronics</h3>
-                <p>Analog & Digital Circuits, Sensors, PCB concepts, Signal processing basics</p>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- PROJECTS -->
-<section id="projects">
-    <div class="container">
-        <div class="section-title">
-            <h2>Projects</h2>
-        </div>
-        <div class="projects-grid">
-            <div class="project-card">
-                <h3>IoT Based AgriTech Monitoring System</h3>
-                <p>
-                    LoRa‑based soil monitoring system measuring moisture, temperature, humidity, and pH 
-                    with offline data storage and cloud visualization.
-                </p>
-            </div>
-            <div class="project-card">
-                <h3>LED Matrix & LED Cube Designs</h3>
-                <p>
-                    Designed 4x3 LED matrix, 8x8 LED matrix using 74HC595, and 3x3x3 LED cube 
-                    with multiplexing and animation control.
-                </p>
-            </div>
-            <div class="project-card">
-                <h3>Hand Sanitizer Dispenser</h3>
-                <p>
-                    Automatic contactless sanitizer system using IR/PIR sensors and microcontroller logic.
-                </p>
-            </div>
-            <div class="project-card">
-                <h3>ThingSpeak TalkBack Control</h3>
-                <p>
-                    Cloud‑based command execution system using ESP8266 for remote device control.
-                </p>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- EDUCATION -->
-<section id="education">
-    <div class="container">
-        <div class="section-title">
-            <h2>Education</h2>
-        </div>
-        <div class="timeline">
-            <div class="timeline-item">
-                <h3>BE Electronics Communication & Automation Engineering</h3>
-                <p>Khwopa Engineering College | Currently Studying</p>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- CONTACT -->
-<section id="contact">
-    <div class="container">
-        <div class="section-title">
-            <h2>Contact</h2>
-        </div>
-        <p style="text-align:center; color:#6c757d;">
-            Email: electrokailash@gmail.com <br>
-            YouTube:
-            <a href="https://www.youtube.com/@nepali-tech-innove-2079">tech - taitan (nepal) </a><br>
-            <a href="https://www.youtube.com/@Electrokailashchy"> electrokailash chy</a><br>
-
-            Location: Nepal
-        </p>
-    </div>
-</section>
-
-<!-- FOOTER -->
-<footer>
-    <p>© 2025 Kailash | Electronics & IoT Portfolio</p>
-</footer>
-
+    // Listen for changes
+    ledRef.on('value', snapshot => {
+      const value = snapshot.val();
+      document.getElementById('status').innerText = value === 1 ? "ON" : "OFF";
+    });
+  </script>
 </body>
 </html>
