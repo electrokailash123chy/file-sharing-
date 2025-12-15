@@ -3,27 +3,70 @@
 <head>
   <title>ESP32 LED Control</title>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 </head>
 <body>
-  <h2>ESP32 LED Control (Pin 4)</h2>
-  <button onclick="toggleLED()">Toggle LED</button>
-  <p>Status: <span id="status">OFF</span></p>
+  <h2>ESP32 LED Control</h2>
+
+  <!-- Single container for login or LED control -->
+  <div id="container">
+    <input type="email" id="email" placeholder="Email"><br><br>
+    <input type="password" id="password" placeholder="Password"><br><br>
+    <button onclick="login()">Login / Sign Up</button>
+    <p id="message"></p>
+  </div>
 
   <script>
-    // Firebase config
     const firebaseConfig = {
-     apiKey: "AIzaSyAFTxTvVYH6IsVBLZtrr84qvkc0JsARTTQ",
-    authDomain: "esp32-led-ed9ea.firebaseapp.com",
-    databaseURL: "https://esp32-led-ed9ea-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "esp32-led-ed9ea",
+      apiKey: "AIzaSyAFTxTvVYH6IsVBLZtrr84qvkc0JsARTTQ",
+      authDomain: "esp32-led-ed9ea.firebaseapp.com",
+      databaseURL: "https://esp32-led-ed9ea-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "esp32-led-ed9ea",
     };
 
     firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
     const db = firebase.database();
     const ledRef = db.ref('pin4');
 
-    // Toggle LED
+    const container = document.getElementById('container');
+    const message = document.getElementById('message');
+
+    function login() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      if (!email || !password) {
+        message.innerText = "Enter valid email and password";
+        return;
+      }
+
+      auth.signInWithEmailAndPassword(email, password)
+        .then(() => showLED())
+        .catch(() => {
+          auth.createUserWithEmailAndPassword(email, password)
+            .then(() => showLED())
+            .catch(() => {
+              message.innerText = "Enter valid email id";
+            });
+        });
+    }
+
+    function showLED() {
+      container.innerHTML = `
+        <button onclick="toggleLED()">Toggle LED</button>
+        <p>Status: <span id="status">OFF</span></p>
+        <button onclick="logout()">Logout</button>
+      `;
+      listenLED();
+    }
+
+    function logout() {
+      auth.signOut();
+      location.reload(); // reload page to show login inputs again
+    }
+
     function toggleLED() {
       ledRef.get().then(snapshot => {
         const value = snapshot.val();
@@ -31,10 +74,15 @@
       });
     }
 
-    // Listen for changes
-    ledRef.on('value', snapshot => {
-      const value = snapshot.val();
-      document.getElementById('status').innerText = value === 1 ? "ON" : "OFF";
+    function listenLED() {
+      ledRef.on('value', snapshot => {
+        const value = snapshot.val();
+        document.getElementById('status').innerText = value === 1 ? "ON" : "OFF";
+      });
+    }
+
+    auth.onAuthStateChanged(user => {
+      if (user) showLED();
     });
   </script>
 </body>
